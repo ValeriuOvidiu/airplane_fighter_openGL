@@ -1,0 +1,81 @@
+#include <windows.h> // nu se copiaza pe linux
+#include <GL/glut.h>
+#include <GL\freeglut.h>
+#include <stdio.h>
+#include <stdbool.h>
+#include <math.h>
+#include <stdlib.h>
+#include "meteorites.h"
+#include "plane.h"
+bool key_left_pressed = false;
+bool key_right_pressed = false;
+int time_since_last_plane_drow = -1;
+
+void draw_airplane(struct plane *my_plane) {
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	// Draw triangle (airplane nose)
+	glBegin(GL_TRIANGLES);
+	glColor3f(my_plane->plane_red, my_plane->plane_green, 0.0f);
+	glVertex2f(my_plane->plane_x, my_plane->plane_y + 0.08f);
+	glVertex2f(my_plane->plane_x - 0.03f, my_plane->plane_y + 0.03f);
+	glVertex2f(my_plane->plane_x + 0.03f, my_plane->plane_y + 0.03f);
+	glEnd();
+
+	// Draw body (top quad)
+	glBegin(GL_QUADS);
+	glVertex2f(my_plane->plane_x - 0.06f, my_plane->plane_y + 0.03f);
+	glVertex2f(my_plane->plane_x - 0.06f, my_plane->plane_y);
+	glVertex2f(my_plane->plane_x + 0.06f, my_plane->plane_y);
+	glVertex2f(my_plane->plane_x + 0.06f, my_plane->plane_y + 0.03f);
+	glEnd();
+
+	// Draw tail or lower part
+	glBegin(GL_QUADS);
+	glVertex2f(my_plane->plane_x - 0.03f, my_plane->plane_y);
+	glVertex2f(my_plane->plane_x - 0.03f, my_plane->plane_y - 0.06f);
+	glVertex2f(my_plane->plane_x + 0.03f, my_plane->plane_y - 0.06f);
+	glVertex2f(my_plane->plane_x + 0.03f, my_plane->plane_y);
+	glEnd();
+
+	// Optional: flush to ensure drawing is finished
+	// glFlush();
+}
+
+void specialKeyDown(int key, int x, int y) {
+	if (key == GLUT_KEY_LEFT)
+		key_left_pressed = true;
+	if (key == GLUT_KEY_RIGHT)
+		key_right_pressed = true;
+}
+
+// Când o tastă specială e ELIBERATĂ
+void specialKeyUp(int key, int x, int y) {
+	if (key == GLUT_KEY_LEFT) {
+		key_left_pressed = false;
+		printf("aici");
+	}
+	if (key == GLUT_KEY_RIGHT)
+		key_right_pressed = false;
+}
+void update_plane_position(struct plane *my_plane) {
+	if (time_since_last_plane_drow == -1) {
+		time_since_last_plane_drow = glutGet(GLUT_ELAPSED_TIME);
+
+	}
+	float speed;
+	int present_time = glutGet(GLUT_ELAPSED_TIME);
+	int delta_time = present_time - time_since_last_plane_drow;
+	speed = (float) 0.002 * delta_time;
+	if (key_left_pressed && my_plane->plane_x > -1
+			&& my_plane->plane_red == 0) {
+		my_plane->plane_x -= speed;
+	}
+
+	if (key_right_pressed && my_plane->plane_x < 1
+			&& my_plane->plane_red == 0) {
+		my_plane->plane_x += speed;
+	}
+	time_since_last_plane_drow = present_time;
+}
