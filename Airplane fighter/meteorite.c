@@ -6,18 +6,32 @@
 #include <math.h>
 #include <stdlib.h>
 #include "meteorites.h"
-struct meteorite {
-	float meteorite_x;
-	float meteorite_y;
-	float meteorite_begin;
-	float meteorite_r;
+struct meteorite meteorites[10];
 
-};
-struct meteorite meteorites[100];
 
+void create_meteorites() {
+	int meteorite_index = 0;
+	meteorites[meteorite_index].meteorite_r = (float) randf(1, 3) / 10;
+	meteorites[meteorite_index].meteorite_x = randf(1, 3) - 2;
+	meteorites[meteorite_index].meteorite_y = 1.2;
+	meteorites[meteorite_index].meteorite_begin =
+			meteorites[meteorite_index].meteorite_y;
+	for (meteorite_index = 1; meteorite_index < 100; ++meteorite_index) {
+		meteorites[meteorite_index].meteorite_r = (float) randf(1, 3) / 10;
+		meteorites[meteorite_index].meteorite_x = randf(1, 3) - 2;
+		meteorites[meteorite_index].meteorite_y =
+				meteorites[meteorite_index - 1].meteorite_y
+						+ meteorites[meteorite_index - 1].meteorite_r
+						+ meteorites[meteorite_index].meteorite_r;
+		meteorites[meteorite_index].meteorite_begin =
+				meteorites[meteorite_index].meteorite_y;
+
+	}
+}
 
 void draw_meteorite(float x, float y, float radius) {
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+
 	glColor3f(1.0f, 1.0f, 1.0f);
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();

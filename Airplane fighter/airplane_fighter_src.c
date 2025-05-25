@@ -7,72 +7,28 @@
 #include <stdlib.h>
 #include "meteorites.h"
 #include "plane.h"
+#include "start_restart.h"
 
-//glutGet(GLUT_ELAPSED_TIME)
-//https://stackoverflow.com/questions/8523346/how-to-control-finely-the-glut-inner-loop
 bool meteorites_created=false;
 bool start_game = false;
-float time_since_last_meteorite_draw, time_since_last_plane_drow;
-
-struct meteorite {
-	float meteorite_x;
-	float meteorite_y;
-	float meteorite_begin;
-	float meteorite_r;
-
-};
-
+bool restart_game = false;
+bool user_logged_in = false;
+int time_since_last_meteorite_draw = -1;
 struct plane my_plane = { 0, -0.7, 1.0, 0, 0 };
-struct meteorite meteorites[100];
-
-
-
-void create_meteorites() {
-	int meteorite_index = 0;
-	meteorites[meteorite_index].meteorite_r = randf(1, 2) - 1;
-	meteorites[meteorite_index].meteorite_x = randf(1, 3) - 2;
-	meteorites[meteorite_index].meteorite_y = 1.2;
-	meteorites[meteorite_index].meteorite_begin =
-			meteorites[meteorite_index].meteorite_y;
-	for (meteorite_index = 1; meteorite_index < 100; ++meteorite_index) {
-		meteorites[meteorite_index].meteorite_r = (float) randf(1, 3) / 10;
-		meteorites[meteorite_index].meteorite_x = randf(1, 3) - 2;
-		meteorites[meteorite_index].meteorite_y =
-				meteorites[meteorite_index - 1].meteorite_y
-						+ meteorites[meteorite_index - 1].meteorite_r
-						+ meteorites[meteorite_index].meteorite_r;
-		meteorites[meteorite_index].meteorite_begin =
-				meteorites[meteorite_index].meteorite_y;
-
-	}
-}
-
-
-
-
-
+extern struct meteorite meteorites[10];
 
 
 
 void update() {
-
-
-  
-
-    glutPostRedisplay();
+	glutPostRedisplay();
 }
 
 
-void colizion(int index_meteorite) {
-	float x_axis = my_plane.plane_x - meteorites[index_meteorite].meteorite_x;
-	float y_axis = my_plane.plane_y - meteorites[index_meteorite].meteorite_y;
-	float distance = sqrt(x_axis * x_axis + y_axis * y_axis);
-	if (distance < meteorites[index_meteorite].meteorite_r + 0.06) {
-		my_plane.plane_red = 1.0;
-		my_plane.plane_green = 0;
-	}
-}
+
 void animate_meteorite(){
+	if (time_since_last_meteorite_draw == -1) {
+		time_since_last_meteorite_draw = glutGet(GLUT_ELAPSED_TIME);
+	}
 	int meteorites_index;
 	float present_time=glutGet(GLUT_ELAPSED_TIME);
 	float delta_time = present_time - time_since_last_meteorite_draw;
@@ -84,7 +40,7 @@ void animate_meteorite(){
 		draw_meteorite(meteorites[meteorites_index].meteorite_x,
 				meteorites[meteorites_index].meteorite_y,
 				meteorites[meteorites_index].meteorite_r);
-		colizion(meteorites_index);
+		colizion(&my_plane, &meteorites[meteorites_index]);
 		if (meteorites[meteorites_index].meteorite_y
 				< -1 - meteorites[meteorites_index].meteorite_r) {
 			meteorites[meteorites_index].meteorite_y =
@@ -93,17 +49,13 @@ void animate_meteorite(){
 			meteorites[meteorites_index].meteorite_x = randf(1, 3) - 2;
 		}
 
-
-	
 	}
     //printf("%f  %f  %f     ",meteorites[1].meteorite_x,meteorites[1].meteorite_y,meteorites[1].meteorite_r);
 
 	time_since_last_meteorite_draw = present_time;
 }
 
-draw_start_button() {
 
-}
 int last;
 void display() {
 	
@@ -118,28 +70,32 @@ void display() {
 		usleep(sleepp);
 		present = glutGet(GLUT_ELAPSED_TIME);
 		delta = present - last;
-		printf("%d  ", delta);
 	}
 	last = glutGet(GLUT_ELAPSED_TIME);
 
 
-	if (start_game) {
+	if (!user_logged_in) {
+		drow_loggin_form();
+	} else if (start_game && !restart_game) {
+		glClear(GL_COLOR_BUFFER_BIT);
+
 		update_plane_position(&my_plane);
-		draw_airplane(&my_plane);
 	animate_meteorite();
-	} else {
-		update_plane_position(&my_plane);
 		draw_airplane(&my_plane);
 
-		animate_meteorite();
+	} else if (!start_game) {
+		draw_start_button();
+	} else if (restart_game) {
+		draw_restart_button();
+		draw_airplane(&my_plane);
+
+
 	}
 
 	glFlush();
 }
 int main(int argc, char** argv) {
-	int arg1=1;
 	glutInit(&argc, argv);
-	time_since_last_meteorite_draw = glutGet(GLUT_ELAPSED_TIME);
 	//time_since_last_plane_drow = glutGet(GLUT_ELAPSED_TIME);
 	last = glutGet(GLUT_ELAPSED_TIME);
 	if(!meteorites_created){
@@ -165,9 +121,12 @@ int main(int argc, char** argv) {
 
 	  glutSpecialFunc(specialKeyDown); // cand apesi
 	    glutSpecialUpFunc(specialKeyUp); // cand eliberezi
+	glutKeyboardFunc(start_key);
+	//glutKeyboardFunc(restart_key);
 
 	glutDisplayFunc(display);
 	glutMainLoop();
+	glutMouseFunc(mouse);
 
 return 0;}
 
