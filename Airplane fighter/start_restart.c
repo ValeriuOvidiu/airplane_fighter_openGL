@@ -6,11 +6,15 @@
 #include <math.h>
 #include <stdlib.h>
 #include "meteorites.h"
+#include "login_system.h"
+
 #include "plane.h"
 extern bool start_game;
 extern bool restart_game;
 extern struct plane my_plane;
-extern int time_since_last_meteorite_draw;
+extern int time_since_last_meteorite_draw, current_score;
+extern struct player my_player;
+bool reset_called = false;
 void draw_start_button() {
 	glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
@@ -65,14 +69,18 @@ void reset() {
 	my_plane.plane_red = 0;
 	my_plane.distroid = 0;
 	time_since_last_meteorite_draw = -1;
+	current_score = 0;
+	my_player.nr_of_games++;
+
+
 }
 void start_key(int key, int x, int y) {
 	if (key == 13 && !start_game) {
 		start_game = true;
-	} else if (key == 13 && start_game) {
+	} else if (key == 13 && start_game && restart_game) {
+
 	reset();
 
 	}
-	printf("start");
 
 }

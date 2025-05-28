@@ -6,5 +6,6 @@ struct player {
 	int score;
 	int nr_of_games;
 };
-void drow_loggin_form();
+void update_db();
+void account_menu();
 #endif

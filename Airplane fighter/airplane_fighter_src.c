@@ -8,6 +8,9 @@
 #include "meteorites.h"
 #include "plane.h"
 #include "start_restart.h"
+#include "login_system.h"
+#include <stdlib.h>
+
 
 bool meteorites_created=false;
 bool start_game = false;
@@ -16,6 +19,10 @@ bool user_logged_in = false;
 int time_since_last_meteorite_draw = -1;
 struct plane my_plane = { 0, -0.7, 1.0, 0, 0 };
 extern struct meteorite meteorites[10];
+extern struct player my_player;
+extern struct player players[100];
+int current_score = 0, score_from_last_update = 0;
+
 
 
 
@@ -47,6 +54,8 @@ void animate_meteorite(){
 					meteorites[9].meteorite_begin - 2;
 			meteorites[meteorites_index].meteorite_r = (float) randf(1, 3) / 10;
 			meteorites[meteorites_index].meteorite_x = randf(1, 3) - 2;
+			current_score++;
+
 		}
 
 	}
@@ -57,6 +66,47 @@ void animate_meteorite(){
 
 
 int last;
+int time_since_last_db_update;
+void draw_score() {
+	int len, i, all_time_score_value;
+	if (current_score >= score_from_last_update) {
+	all_time_score_value = my_player.score + current_score
+			- score_from_last_update;
+	} else {
+		score_from_last_update = 0;
+	}
+
+	char current_score_str[100], all_time_score[100], total_nr_of_games[100];
+	glColor3f(0.0f, 1.0f, 0.0f);
+	sprintf(total_nr_of_games, "Total Games Played: %d", my_player.nr_of_games);
+
+	sprintf(all_time_score, "All Time Score %d", all_time_score_value);
+	sprintf(current_score_str, "Current Score %d", current_score);
+	len = (int) strlen(current_score_str);
+	glRasterPos2f(-0.9f, 0.8f);
+
+	for (i = 0; i < len; i++) {
+
+		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, current_score_str[i]);
+
+	}
+	len = (int) strlen(all_time_score);
+	glRasterPos2f(-0.9f, 0.9f);
+
+	for (i = 0; i < len; i++) {
+
+		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, all_time_score[i]);
+
+	}
+	len = (int) strlen(total_nr_of_games);
+	glRasterPos2f(0.4f, 0.9f);
+
+	for (i = 0; i < len; i++) {
+		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, total_nr_of_games[i]);
+
+	}
+
+}
 void display() {
 	
 	int present = glutGet(GLUT_ELAPSED_TIME);
@@ -64,8 +114,20 @@ void display() {
 	last = present;
 	
 	delta *= 1000;
-	if (delta < 15000) {
+	int update_db_timer = present - time_since_last_db_update;
 
+	if (update_db_timer > 1000) {
+		if (current_score >= score_from_last_update) {
+		my_player.score += current_score - score_from_last_update;
+		score_from_last_update = current_score;
+		update_db();
+		time_since_last_db_update = glutGet(GLUT_ELAPSED_TIME);
+		} else {
+			score_from_last_update = 0;
+		}
+	}
+	if (delta < 15000) {
+		
 		int sleepp = 15000 - delta;
 		usleep(sleepp);
 		present = glutGet(GLUT_ELAPSED_TIME);
@@ -74,14 +136,13 @@ void display() {
 	last = glutGet(GLUT_ELAPSED_TIME);
 
 
-	if (!user_logged_in) {
-		drow_loggin_form();
-	} else if (start_game && !restart_game) {
+	 if (start_game && !restart_game) {
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		update_plane_position(&my_plane);
 	animate_meteorite();
 		draw_airplane(&my_plane);
+		draw_score();
 
 	} else if (!start_game) {
 		draw_start_button();
@@ -94,10 +155,17 @@ void display() {
 
 	glFlush();
 }
+
+
+
 int main(int argc, char** argv) {
+	account_menu();
 	glutInit(&argc, argv);
 	//time_since_last_plane_drow = glutGet(GLUT_ELAPSED_TIME);
 	last = glutGet(GLUT_ELAPSED_TIME);
+	update_db();
+	time_since_last_db_update = glutGet(GLUT_ELAPSED_TIME);
+	
 	if(!meteorites_created){
 		meteorites_created=true;
 		create_meteorites();
@@ -111,22 +179,23 @@ int main(int argc, char** argv) {
 
 	    // Calculate X position for centering on the X-axis
 	    int windowX = (screenWidth - windowWidth) / 2;
-	    int windowY = 0; // Example Y position (not centered vertically)
+	int windowY = 0;
 
-	    // Initialize window position
+	    
 	    glutInitWindowPosition(windowX, windowY);
 	glutInitWindowSize(windowWidth, windowHeight);
 	glutCreateWindow("OpenGL ovidiu Test");
-    glutIdleFunc(update); // apelat constant pentru miscare lina
+	glutIdleFunc(update); 
 
-	  glutSpecialFunc(specialKeyDown); // cand apesi
-	    glutSpecialUpFunc(specialKeyUp); // cand eliberezi
+	  glutSpecialFunc(specialKeyDown);
+	glutSpecialUpFunc(specialKeyUp);
 	glutKeyboardFunc(start_key);
-	//glutKeyboardFunc(restart_key);
+
 
 	glutDisplayFunc(display);
 	glutMainLoop();
-	glutMouseFunc(mouse);
+	update_db();
+	printf("Eroare la salvarea datelor!\n");
 
 return 0;}
 
