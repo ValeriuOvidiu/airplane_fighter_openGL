@@ -1,4 +1,4 @@
-#include <windows.h> // nu se copiaza pe linux
+#include <windows.h>
 #include <GL/glut.h>
 #include <GL\freeglut.h>
 #include <stdio.h>
@@ -15,9 +15,8 @@ extern bool restart_game;
 
 void draw_airplane(struct plane *my_plane) {
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-	//glClear(GL_COLOR_BUFFER_BIT);
 
-	// Draw triangle (airplane nose)
+	// draw triangle (airplane nose)
 	glBegin(GL_TRIANGLES);
 	glColor3f(my_plane->plane_red, my_plane->plane_green, 0.0f);
 	glVertex2f(my_plane->plane_x, my_plane->plane_y + 0.08f);
@@ -25,7 +24,7 @@ void draw_airplane(struct plane *my_plane) {
 	glVertex2f(my_plane->plane_x + 0.03f, my_plane->plane_y + 0.03f);
 	glEnd();
 
-	// Draw body (top quad)
+	// draw body (top quad)
 	glBegin(GL_QUADS);
 	glVertex2f(my_plane->plane_x - 0.06f, my_plane->plane_y + 0.03f);
 	glVertex2f(my_plane->plane_x - 0.06f, my_plane->plane_y);
@@ -33,7 +32,7 @@ void draw_airplane(struct plane *my_plane) {
 	glVertex2f(my_plane->plane_x + 0.06f, my_plane->plane_y + 0.03f);
 	glEnd();
 
-	// Draw tail or lower part
+	// draw tail or lower part
 	glBegin(GL_QUADS);
 	glVertex2f(my_plane->plane_x - 0.03f, my_plane->plane_y);
 	glVertex2f(my_plane->plane_x - 0.03f, my_plane->plane_y - 0.06f);
@@ -41,10 +40,8 @@ void draw_airplane(struct plane *my_plane) {
 	glVertex2f(my_plane->plane_x + 0.03f, my_plane->plane_y);
 	glEnd();
 
-	// Optional: flush to ensure drawing is finished
-	// glFlush();
 }
-
+// Când o tastă specială este apasata
 void specialKeyDown(int key, int x, int y) {
 	if (key == GLUT_KEY_LEFT)
 		key_left_pressed = true;
@@ -52,11 +49,10 @@ void specialKeyDown(int key, int x, int y) {
 		key_right_pressed = true;
 }
 
-// Când o tastă specială e ELIBERATĂ
+// Când o tastă specială este eliberata
 void specialKeyUp(int key, int x, int y) {
 	if (key == GLUT_KEY_LEFT) {
 		key_left_pressed = false;
-		printf("aici");
 	}
 	if (key == GLUT_KEY_RIGHT)
 		key_right_pressed = false;

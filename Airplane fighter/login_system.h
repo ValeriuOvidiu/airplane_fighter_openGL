@@ -1,5 +1,5 @@
-#ifndef LOGIN_H
-# define LOGGIN_H
+#ifndef LOGGIN_H
+#define LOGGIN_H
 struct player {
 	char username[100];
 	char password[100];

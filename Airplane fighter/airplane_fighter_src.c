@@ -9,7 +9,6 @@
 #include "plane.h"
 #include "start_restart.h"
 #include "login_system.h"
-#include <stdlib.h>
 
 
 bool meteorites_created=false;
@@ -21,15 +20,13 @@ struct plane my_plane = { 0, -0.7, 1.0, 0, 0 };
 extern struct meteorite meteorites[10];
 extern struct player my_player;
 extern struct player players[100];
+extern int player_id;
 int current_score = 0, score_from_last_update = 0;
-
-
 
 
 void update() {
 	glutPostRedisplay();
 }
-
 
 
 void animate_meteorite(){
@@ -59,7 +56,6 @@ void animate_meteorite(){
 		}
 
 	}
-    //printf("%f  %f  %f     ",meteorites[1].meteorite_x,meteorites[1].meteorite_y,meteorites[1].meteorite_r);
 
 	time_since_last_meteorite_draw = present_time;
 }
@@ -70,7 +66,7 @@ int time_since_last_db_update;
 void draw_score() {
 	int len, i, all_time_score_value;
 	if (current_score >= score_from_last_update) {
-	all_time_score_value = my_player.score + current_score
+		all_time_score_value = players[player_id].score + current_score
 			- score_from_last_update;
 	} else {
 		score_from_last_update = 0;
@@ -78,7 +74,8 @@ void draw_score() {
 
 	char current_score_str[100], all_time_score[100], total_nr_of_games[100];
 	glColor3f(0.0f, 1.0f, 0.0f);
-	sprintf(total_nr_of_games, "Total Games Played: %d", my_player.nr_of_games);
+	sprintf(total_nr_of_games, "Total Games Played: %d",
+			players[player_id].nr_of_games);
 
 	sprintf(all_time_score, "All Time Score %d", all_time_score_value);
 	sprintf(current_score_str, "Current Score %d", current_score);
@@ -118,7 +115,7 @@ void display() {
 
 	if (update_db_timer > 1000) {
 		if (current_score >= score_from_last_update) {
-		my_player.score += current_score - score_from_last_update;
+			players[player_id].score += current_score - score_from_last_update;
 		score_from_last_update = current_score;
 		update_db();
 		time_since_last_db_update = glutGet(GLUT_ELAPSED_TIME);
@@ -161,7 +158,6 @@ void display() {
 int main(int argc, char** argv) {
 	account_menu();
 	glutInit(&argc, argv);
-	//time_since_last_plane_drow = glutGet(GLUT_ELAPSED_TIME);
 	last = glutGet(GLUT_ELAPSED_TIME);
 	update_db();
 	time_since_last_db_update = glutGet(GLUT_ELAPSED_TIME);
@@ -177,7 +173,6 @@ int main(int argc, char** argv) {
 	    int windowWidth = 800;  // Example width
 	    int windowHeight = screenHeight; // Example height
 
-	    // Calculate X position for centering on the X-axis
 	    int windowX = (screenWidth - windowWidth) / 2;
 	int windowY = 0;
 

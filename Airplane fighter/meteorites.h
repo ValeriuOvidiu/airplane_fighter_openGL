@@ -10,6 +10,7 @@ struct meteorite {
 
 void draw_meteorite(float x, float y, float radius);
 float randf(float min, float max);
+void create_meteorites();
 
 
 #endif

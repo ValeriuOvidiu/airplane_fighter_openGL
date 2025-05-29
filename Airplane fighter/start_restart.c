@@ -12,8 +12,8 @@
 extern bool start_game;
 extern bool restart_game;
 extern struct plane my_plane;
-extern int time_since_last_meteorite_draw, current_score;
-extern struct player my_player;
+extern int time_since_last_meteorite_draw, current_score, player_id;
+extern struct player players[100];
 bool reset_called = false;
 void draw_start_button() {
 	glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
@@ -70,7 +70,7 @@ void reset() {
 	my_plane.distroid = 0;
 	time_since_last_meteorite_draw = -1;
 	current_score = 0;
-	my_player.nr_of_games++;
+	players[player_id].nr_of_games++;
 
 
 }

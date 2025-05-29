@@ -1,5 +1,5 @@
 #ifndef PLANE_H
-# define PLANE_H
+#define PLANE_H
 struct plane {
 	float plane_x;
 	float plane_y;
